@@ -313,78 +313,9 @@
             </div>
         </nav>
 
-        <!-- Mobile Menu Overlay -->
-        <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
-        <div class="mobile-menu" id="mobileMenu">
-            <div class="mobile-menu-header">
-                <i class="fa-solid fa-wallet gradient-icon"></i>
-                <h2>Finance<span>Pro</span></h2>
-                <button class="close-menu-btn" id="closeMenuBtn">
-                    <i class="fa-solid fa-times"></i>
-                </button>
-            </div>
-            <ul class="mobile-nav-links">
-                <li class="active" data-view="dashboard">
-                    <i class="fa-solid fa-chart-pie"></i>
-                    <span>Dashboard</span>
-                </li>
-                <li data-view="history">
-                    <i class="fa-solid fa-clock-rotate-left"></i>
-                    <span>History</span>
-                </li>
-                <li data-view="budget">
-                    <i class="fa-solid fa-bullseye"></i>
-                    <span>Budgets</span>
-                </li>
-                <li data-view="income">
-                    <i class="fa-solid fa-money-bill-trend-up"></i>
-                    <span>Income</span>
-                </li>
-                <li data-view="insights">
-                    <i class="fa-solid fa-chart-line"></i>
-                    <span>Insights</span>
-                </li>
-                <li data-view="analytics">
-                    <i class="fa-solid fa-chart-bar"></i>
-                    <span>Analytics</span>
-                </li>
-            </ul>
-            <div class="mobile-menu-footer">
-                <button class="backup-btn" id="mobileLogoutBtn" title="Logout" style="background: #ef4444; color: white;">
-                    <i class="fa-solid fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </button>
-                <div class="backup-actions">
-                    <button class="backup-btn" id="mobileExportDataBtn" title="Export Backup">
-                        <i class="fa-solid fa-file-export"></i>
-                        <span>Export</span>
-                    </button>
-                    <button class="backup-btn" id="mobileImportDataBtn" title="Import Backup">
-                        <i class="fa-solid fa-file-import"></i>
-                        <span>Import</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <!-- Main Content Area -->
         <main class="main-content hidden">
-            <!-- Mobile Header -->
-            <header class="mobile-header">
-                <button class="hamburger-btn" id="hamburgerBtn">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-                <div class="mobile-logo">
-                    <i class="fa-solid fa-wallet gradient-icon"></i>
-                    <h2>Finance<span>Pro</span></h2>
-                </div>
-                <div id="syncIndicator" class="sync-indicator sync-off" onclick="window.expenseApp && window.expenseApp.manualSync()" title="Click to sync now">
-                    <i class="fa-solid fa-cloud-slash"></i><span>Syncing...</span>
-                </div>
-            </header>
-
-            <!-- Desktop Header -->
-            <header class="top-header desktop-only">
+            <header class="top-header">
                 <div class="greeting">
                     <h1 id="pageTitle">Overview</h1>
                     <p id="currentDateDisplay">Today is Loading...</p>

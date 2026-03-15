@@ -625,63 +625,6 @@ class ExpenseTrackerApp {
     }
 
     bindEvents() {
-        // Mobile Hamburger Menu
-        const hamburgerBtn = document.getElementById('hamburgerBtn');
-        const closeMenuBtn = document.getElementById('closeMenuBtn');
-        const mobileMenu = document.getElementById('mobileMenu');
-        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
-        const mobileNavLinks = document.querySelectorAll('.mobile-nav-links li');
-        
-        if (hamburgerBtn && mobileMenu) {
-            hamburgerBtn.addEventListener('click', () => {
-                mobileMenu.classList.add('active');
-                mobileMenuOverlay.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            });
-            
-            closeMenuBtn.addEventListener('click', () => {
-                mobileMenu.classList.remove('active');
-                mobileMenuOverlay.classList.remove('active');
-                document.body.style.overflow = '';
-            });
-            
-            mobileMenuOverlay.addEventListener('click', () => {
-                mobileMenu.classList.remove('active');
-                mobileMenuOverlay.classList.remove('active');
-                document.body.style.overflow = '';
-            });
-            
-            // Mobile navigation
-            mobileNavLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    const view = e.currentTarget.dataset.view;
-                    this.switchView(view);
-                    // Update desktop nav too
-                    this.els.navLinks.forEach(l => l.classList.remove('active'));
-                    document.querySelector(`.nav-links li[data-view="${view}"]`)?.classList.add('active');
-                    // Close mobile menu
-                    mobileMenu.classList.remove('active');
-                    mobileMenuOverlay.classList.remove('active');
-                    document.body.style.overflow = '';
-                });
-            });
-            
-            // Mobile logout
-            document.getElementById('mobileLogoutBtn')?.addEventListener('click', () => {
-                this.handleLogout();
-            });
-            
-            // Mobile export
-            document.getElementById('mobileExportDataBtn')?.addEventListener('click', () => {
-                this.exportData();
-            });
-            
-            // Mobile import
-            document.getElementById('mobileImportDataBtn')?.addEventListener('click', () => {
-                document.getElementById('importFile').click();
-            });
-        }
-        
         // Navigation
         this.els.navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
