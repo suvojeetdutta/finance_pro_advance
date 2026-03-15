@@ -1,3 +1,7 @@
+// Global Supabase credentials (loaded from sync.js)
+var SUPABASE_URL = typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : '';
+var SUPABASE_KEY = typeof SUPABASE_KEY !== 'undefined' ? SUPABASE_KEY : '';
+
 class ExpenseTrackerApp {
     constructor() {
         this.expenses = [];
@@ -77,6 +81,16 @@ class ExpenseTrackerApp {
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => this.logout());
         }
+        
+        // Supabase setup event
+        const setupSupabaseBtn = document.getElementById('setupSupabaseBtn');
+        if (setupSupabaseBtn) {
+            setupSupabaseBtn.addEventListener('click', () => {
+                if (typeof setupSupabaseCredentials === 'function') {
+                    setupSupabaseCredentials();
+                }
+            });
+        }
     }
     
     isLoggedIn() {
@@ -117,6 +131,8 @@ class ExpenseTrackerApp {
         const mobile = document.getElementById('loginMobile').value.trim();
         const password = document.getElementById('loginPassword').value;
         
+        console.log('Login attempt for:', mobile);
+        
         // Validate
         if (!mobile || !password) {
             this.showError('loginError', 'Please enter mobile number and password');
@@ -135,16 +151,23 @@ class ExpenseTrackerApp {
             let user = null;
             let passwordMatch = false;
             
+            console.log('Checking Supabase:', typeof syncManager, SUPABASE_URL, SUPABASE_KEY);
+            
             if (typeof syncManager !== 'undefined' && SUPABASE_URL && SUPABASE_KEY) {
+                console.log('Trying Supabase login...');
                 const result = await syncManager.loginUser(mobile);
+                console.log('Supabase result:', result);
                 if (result.success && result.user) {
                     user = result.user;
                     passwordMatch = this.verifyPassword(password, user.password_hash);
                 }
+            } else {
+                console.log('Supabase not configured, using local storage');
             }
             
             // Fallback to localStorage if Supabase not available
             if (!user) {
+                console.log('Checking local storage...');
                 user = this.findUser(mobile);
                 if (user) {
                     passwordMatch = this.verifyPassword(password, user.password);
@@ -159,20 +182,29 @@ class ExpenseTrackerApp {
                 throw new Error('Incorrect password');
             }
             
+            console.log('Login successful for:', user.mobile);
+            
             // Login successful
             const token = this.generateToken();
             localStorage.setItem('currentUser', JSON.stringify({ id: user.mobile, mobile: user.mobile }));
             localStorage.setItem('authToken', token);
             
             this.currentUser = { id: user.mobile, mobile: user.mobile };
+            
+            // Show the app
             this.showApp();
+            
+            // Initialize data
             this.initData();
             this.initDOM();
             this.bindEvents();
             this.render();
+            
+            // Sync from cloud
             this.syncFromCloud();
             
         } catch (error) {
+            console.error('Login error:', error);
             this.showError('loginError', error.message);
         } finally {
             this.setLoading('login', false);
@@ -183,6 +215,8 @@ class ExpenseTrackerApp {
         const mobile = document.getElementById('signupMobile').value.trim();
         const password = document.getElementById('signupPassword').value;
         const confirmPassword = document.getElementById('signupConfirmPassword').value;
+        
+        console.log('Signup attempt for:', mobile);
         
         // Validate
         if (!mobile || !password || !confirmPassword) {
@@ -223,10 +257,14 @@ class ExpenseTrackerApp {
             
             // Save to Supabase first
             if (typeof syncManager !== 'undefined' && SUPABASE_URL && SUPABASE_KEY) {
+                console.log('Saving to Supabase...');
                 const result = await syncManager.signupUser(mobile, user.password);
+                console.log('Supabase signup result:', result);
                 if (!result.success) {
                     console.log('Supabase signup note:', result.error);
                 }
+            } else {
+                console.log('Supabase not configured, using local only');
             }
             
             // Save to localStorage as backup
@@ -247,6 +285,7 @@ class ExpenseTrackerApp {
             }, 2000);
             
         } catch (error) {
+            console.error('Signup error:', error);
             this.showError('signupError', error.message);
         } finally {
             this.setLoading('signup', false);

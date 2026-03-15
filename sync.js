@@ -3,18 +3,36 @@
 if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_KEY === 'undefined') {
     var SUPABASE_URL = localStorage.getItem('supabase_url') || '';
     var SUPABASE_KEY = localStorage.getItem('supabase_key') || '';
-    if (!SUPABASE_URL || !SUPABASE_KEY) {
-        // One-time setup prompt
-        setTimeout(() => {
-            const url = prompt('Sync Setup (1/2): Paste your Supabase Project URL:');
-            const key = prompt('Sync Setup (2/2): Paste your Supabase anon key:');
-            if (url && key) {
-                localStorage.setItem('supabase_url', url.trim());
-                localStorage.setItem('supabase_key', key.trim());
-                location.reload();
-            }
-        }, 1000);
+}
+
+// Function to setup Supabase credentials
+function setupSupabaseCredentials() {
+    const url = prompt('Sync Setup (1/2): Paste your Supabase Project URL:');
+    const key = prompt('Sync Setup (2/2): Paste your Supabase anon key:');
+    if (url && key) {
+        localStorage.setItem('supabase_url', url.trim());
+        localStorage.setItem('supabase_key', key.trim());
+        SUPABASE_URL = url.trim();
+        SUPABASE_KEY = key.trim();
+        alert('Supabase credentials saved! Please try again.');
+    } else {
+        alert('Please enter both URL and key.');
     }
+}
+
+// Check if credentials exist, if not prompt
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+    setTimeout(() => {
+        const url = prompt('Sync Setup (1/2): Paste your Supabase Project URL:');
+        const key = prompt('Sync Setup (2/2): Paste your Supabase anon key:');
+        if (url && key) {
+            localStorage.setItem('supabase_url', url.trim());
+            localStorage.setItem('supabase_key', key.trim());
+            SUPABASE_URL = url.trim();
+            SUPABASE_KEY = key.trim();
+            location.reload();
+        }
+    }, 1000);
 }
 
 class SyncManager {
