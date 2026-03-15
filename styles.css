@@ -170,7 +170,14 @@ body {
 
 /* Main Content */
 .hamburger-menu {
-    display: none;
+    display: flex !important;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-right: 0.5rem;
 }
 
 #closeSidebar {
@@ -676,21 +683,6 @@ body {
     }
     .sidebar .logo i { font-size: 1.5rem; }
     
-    /* Bottom Navigation for Mobile */
-    .nav-links {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: var(--bg-secondary);
-        display: flex;
-        justify-content: space-around;
-        padding: 0.5rem;
-        border-top: 1px solid var(--border-color);
-        margin: 0;
-        z-index: 100;
-        box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
-    }
     .nav-links li {
         flex-direction: column;
         gap: 4px;
@@ -709,7 +701,7 @@ body {
     
     .main-content {
         padding: 1rem;
-        padding-bottom: 80px; /* Space for bottom nav */
+        padding-bottom: 20px;
         padding-top: 70px; /* Space for top bar */
     }
     
