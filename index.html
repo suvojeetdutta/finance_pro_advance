@@ -257,11 +257,19 @@
             </div>
         </div>
         
+        <!-- Sidebar Overlay for Mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        
         <!-- Sidebar Navigation -->
         <nav class="sidebar">
-            <div class="logo">
-                <i class="fa-solid fa-wallet gradient-icon"></i>
-                <h2>Finance<span>Pro</span></h2>
+            <div class="sidebar-header-mobile" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                <div class="logo">
+                    <i class="fa-solid fa-wallet gradient-icon"></i>
+                    <h2>Finance<span>Pro</span></h2>
+                </div>
+                <button class="hamburger-menu" id="closeSidebar" style="display:block;">
+                    <i class="fa-solid fa-times"></i>
+                </button>
             </div>
             
             <ul class="nav-links">
@@ -316,6 +324,9 @@
         <!-- Main Content Area -->
         <main class="main-content hidden">
             <header class="top-header">
+                <button class="hamburger-menu" id="hamburgerMenu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
                 <div class="greeting">
                     <h1 id="pageTitle">Overview</h1>
                     <p id="currentDateDisplay">Today is Loading...</p>

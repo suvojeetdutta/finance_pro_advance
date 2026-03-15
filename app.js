@@ -632,8 +632,43 @@ class ExpenseTrackerApp {
                 this.switchView(view);
                 this.els.navLinks.forEach(l => l.classList.remove('active'));
                 e.currentTarget.classList.add('active');
+                
+                // Close sidebar on mobile after navigation
+                const sidebar = document.querySelector('.sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                if (sidebar && sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                    if (overlay) overlay.classList.remove('active');
+                }
             });
         });
+
+        // Hamburger Menu for Mobile
+        const hamburgerBtn = document.getElementById('hamburgerMenu');
+        const closeSidebarBtn = document.getElementById('closeSidebar');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        
+        if (hamburgerBtn && sidebar) {
+            hamburgerBtn.addEventListener('click', () => {
+                sidebar.classList.add('active');
+                if (overlay) overlay.classList.add('active');
+            });
+        }
+        
+        if (closeSidebarBtn && sidebar) {
+            closeSidebarBtn.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                if (overlay) overlay.classList.remove('active');
+            });
+        }
+        
+        if (overlay) {
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+        }
 
         // Theme Toggle Removed
 
