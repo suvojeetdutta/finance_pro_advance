@@ -1,5 +1,21 @@
 // sync.js — Supabase Cloud Sync for FinancePro
-// Credentials loaded from config.js (gitignored)
+// Credentials loaded from config.js (gitignored) or localStorage fallback
+if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_KEY === 'undefined') {
+    var SUPABASE_URL = localStorage.getItem('supabase_url') || '';
+    var SUPABASE_KEY = localStorage.getItem('supabase_key') || '';
+    if (!SUPABASE_URL || !SUPABASE_KEY) {
+        // One-time setup prompt
+        setTimeout(() => {
+            const url = prompt('Sync Setup (1/2): Paste your Supabase Project URL:');
+            const key = prompt('Sync Setup (2/2): Paste your Supabase anon key:');
+            if (url && key) {
+                localStorage.setItem('supabase_url', url.trim());
+                localStorage.setItem('supabase_key', key.trim());
+                location.reload();
+            }
+        }, 1000);
+    }
+}
 
 class SyncManager {
     constructor() {
