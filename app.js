@@ -175,8 +175,8 @@ class ExpenseTrackerApp {
 
         // Preload customized subcategories
         this.subcategories = typeof SUBCATEGORIES !== 'undefined' ? {...SUBCATEGORIES} : {
-            "Need": ["Housing", "Utilities", "Groceries", "Transport", "Health", "Other"],
-            "Want": ["Dining", "Entertainment", "Shopping", "Other"],
+            "Need": ["Housing", "Parents Expenses", "Utilities", "Subscriptions & Fees", "Groceries", "Health & Medicine", "Grooming", "Transport", "Recharge", "Other"],
+            "Want": ["Dining", "Habits", "Subscriptions", "Snacks", "Misc", "Shopping", "Entertainment", "Gifts"],
             "Save": ["Investment", "Emergency Fund", "Other"]
         };
         const customSubs = JSON.parse(localStorage.getItem("customSubcategories") || "{}");

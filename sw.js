@@ -5,7 +5,6 @@ const ASSETS = [
   './styles.css',
   './app.js',
   './sync.js',
-  './data.js',
   './manifest.json',
   './libs/chart.min.js',
   './libs/inter.css',
