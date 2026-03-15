@@ -154,26 +154,6 @@ body {
 /* theme-toggle styles removed */
 
 
-@media (max-width: 768px) {
-    .sidebar-footer {
-        flex-direction: row;
-        gap: 1rem;
-        margin-top: 0;
-        justify-content: space-between;
-        padding: 0.5rem;
-    }
-    .backup-actions {
-        display: flex;
-        gap: 0.5rem;
-    }
-    .backup-btn span { display: none; }
-    .backup-btn { padding: 0.6rem; }
-    #logoutBtn {
-        margin-bottom: 0;
-        margin-right: 0.5rem;
-    }
-}
-
 /* Main Content */
 .main-content {
     flex: 1;
@@ -623,6 +603,7 @@ body {
         top: 0;
         flex-direction: row;
         justify-content: space-between;
+        align-items: center;
         box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
     .sidebar .logo {
@@ -630,6 +611,35 @@ body {
         font-size: 1.2rem;
     }
     .sidebar .logo i { font-size: 1.5rem; }
+    
+    /* Sidebar footer in mobile header */
+    .sidebar-footer {
+        display: flex;
+        flex-direction: row;
+        gap: 0.8rem;
+        margin-top: 0;
+        padding: 0;
+    }
+    .sidebar-footer .backup-btn {
+        padding: 0.5rem;
+    }
+    .sidebar-footer .backup-btn span {
+        display: none;
+    }
+    .sidebar-footer #logoutBtn {
+        background: #ef4444;
+        color: white;
+    }
+    .backup-actions {
+        display: flex;
+        gap: 0.3rem;
+    }
+    #syncIndicator span {
+        display: none;
+    }
+    #syncIndicator {
+        padding: 0.5rem;
+    }
     
     /* Bottom Navigation for Mobile */
     .nav-links {
