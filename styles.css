@@ -705,16 +705,10 @@ body {
     border-left-color: #ef4444;
     background: rgba(239, 68, 68, 0.03);
 }
-.theme-dark .budget-card.budget-over {
-    background: rgba(239, 68, 68, 0.06);
-}
 
 .budget-card.budget-warn {
     border-left-color: #f59e0b;
     background: rgba(245, 158, 11, 0.03);
-}
-.theme-dark .budget-card.budget-warn {
-    background: rgba(245, 158, 11, 0.06);
 }
 
 .budget-card.budget-ok {
