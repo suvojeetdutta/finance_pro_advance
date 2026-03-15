@@ -5,20 +5,328 @@ class ExpenseTrackerApp {
         this.currentView = 'dashboard';
         this.currentChart = null;
         this.lineChart = null;
+        this.currentUser = null;
         
-        // Ensure data exists
-        this.initData();
-        this.initDOM();
-        this.bindEvents();
-
+        // Initialize authentication
+        this.initAuth();
         
-        // Render initial view
-        this.render();
-
-        // Async cloud sync after local init
-        this.syncFromCloud();
+        // Check if user is already logged in
+        if (this.isLoggedIn()) {
+            this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            this.showApp();
+            // Ensure data exists
+            this.initData();
+            this.initDOM();
+            this.bindEvents();
+            // Render initial view
+            this.render();
+            // Async cloud sync after local init
+            this.syncFromCloud();
+        }
     }
-
+    
+    // Authentication Methods
+    initAuth() {
+        // Get DOM elements
+        this.authContainer = document.getElementById('authContainer');
+        this.loginForm = document.getElementById('loginForm');
+        this.signupForm = document.getElementById('signupForm');
+        this.loginBtn = document.getElementById('loginBtn');
+        this.signupBtn = document.getElementById('signupBtn');
+        this.showSignupLink = document.getElementById('showSignup');
+        this.showLoginLink = document.getElementById('showLogin');
+        
+        // Bind authentication events
+        this.bindAuthEvents();
+    }
+    
+    bindAuthEvents() {
+        // Login events
+        this.loginBtn.addEventListener('click', () => this.handleLogin());
+        document.getElementById('loginMobile').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.handleLogin();
+        });
+        document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.handleLogin();
+        });
+        
+        // Signup events
+        this.signupBtn.addEventListener('click', () => this.handleSignup());
+        document.getElementById('signupMobile').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.handleSignup();
+        });
+        document.getElementById('signupPassword').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.handleSignup();
+        });
+        document.getElementById('signupConfirmPassword').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.handleSignup();
+        });
+        
+        // Toggle form events
+        this.showSignupLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showSignupForm();
+        });
+        this.showLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showLoginForm();
+        });
+        
+        // Logout event
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => this.logout());
+        }
+    }
+    
+    isLoggedIn() {
+        const currentUser = localStorage.getItem('currentUser');
+        const token = localStorage.getItem('authToken');
+        return currentUser && token;
+    }
+    
+    showLoginForm() {
+        this.loginForm.classList.remove('hidden');
+        this.signupForm.classList.add('hidden');
+        document.getElementById('loginError').classList.add('hidden');
+        document.getElementById('signupError').classList.add('hidden');
+        document.getElementById('signupSuccess').classList.add('hidden');
+    }
+    
+    showSignupForm() {
+        this.signupForm.classList.remove('hidden');
+        this.loginForm.classList.add('hidden');
+        document.getElementById('loginError').classList.add('hidden');
+        document.getElementById('signupError').classList.add('hidden');
+        document.getElementById('signupSuccess').classList.add('hidden');
+    }
+    
+    showApp() {
+        this.authContainer.classList.add('hidden');
+        document.querySelector('nav.sidebar').classList.remove('hidden');
+        document.querySelector('main.main-content').classList.remove('hidden');
+    }
+    
+    showAuth() {
+        this.authContainer.classList.remove('hidden');
+        document.querySelector('nav.sidebar').classList.add('hidden');
+        document.querySelector('main.main-content').classList.add('hidden');
+    }
+    
+    async handleLogin() {
+        const mobile = document.getElementById('loginMobile').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        
+        // Validate
+        if (!mobile || !password) {
+            this.showError('loginError', 'Please enter mobile number and password');
+            return;
+        }
+        
+        if (!this.validateMobile(mobile)) {
+            this.showError('loginError', 'Please enter a valid 10-digit mobile number');
+            return;
+        }
+        
+        this.setLoading('login', true);
+        
+        try {
+            // Check Supabase first, fallback to local
+            let user = null;
+            let passwordMatch = false;
+            
+            if (typeof syncManager !== 'undefined' && SUPABASE_URL && SUPABASE_KEY) {
+                const result = await syncManager.loginUser(mobile);
+                if (result.success && result.user) {
+                    user = result.user;
+                    passwordMatch = this.verifyPassword(password, user.password_hash);
+                }
+            }
+            
+            // Fallback to localStorage if Supabase not available
+            if (!user) {
+                user = this.findUser(mobile);
+                if (user) {
+                    passwordMatch = this.verifyPassword(password, user.password);
+                }
+            }
+            
+            if (!user) {
+                throw new Error('User not found. Please sign up first.');
+            }
+            
+            if (!passwordMatch) {
+                throw new Error('Incorrect password');
+            }
+            
+            // Login successful
+            const token = this.generateToken();
+            localStorage.setItem('currentUser', JSON.stringify({ id: user.mobile, mobile: user.mobile }));
+            localStorage.setItem('authToken', token);
+            
+            this.currentUser = { id: user.mobile, mobile: user.mobile };
+            this.showApp();
+            this.initData();
+            this.initDOM();
+            this.bindEvents();
+            this.render();
+            this.syncFromCloud();
+            
+        } catch (error) {
+            this.showError('loginError', error.message);
+        } finally {
+            this.setLoading('login', false);
+        }
+    }
+    
+    async handleSignup() {
+        const mobile = document.getElementById('signupMobile').value.trim();
+        const password = document.getElementById('signupPassword').value;
+        const confirmPassword = document.getElementById('signupConfirmPassword').value;
+        
+        // Validate
+        if (!mobile || !password || !confirmPassword) {
+            this.showError('signupError', 'Please fill all fields');
+            return;
+        }
+        
+        if (!this.validateMobile(mobile)) {
+            this.showError('signupError', 'Please enter a valid 10-digit mobile number');
+            return;
+        }
+        
+        if (password.length < 4) {
+            this.showError('signupError', 'Password must be at least 4 characters');
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            this.showError('signupError', 'Passwords do not match');
+            return;
+        }
+        
+        this.setLoading('signup', true);
+        
+        try {
+            // Check if user already exists
+            const existingUser = this.findUser(mobile);
+            if (existingUser) {
+                throw new Error('Mobile number already registered');
+            }
+            
+            // Create user object
+            const user = {
+                mobile: mobile,
+                password: this.hashPassword(password),
+                createdAt: new Date().toISOString()
+            };
+            
+            // Save to Supabase first
+            if (typeof syncManager !== 'undefined' && SUPABASE_URL && SUPABASE_KEY) {
+                const result = await syncManager.signupUser(mobile, user.password);
+                if (!result.success) {
+                    console.log('Supabase signup note:', result.error);
+                }
+            }
+            
+            // Save to localStorage as backup
+            this.saveUser(user);
+            
+            // Show success message
+            document.getElementById('signupSuccess').textContent = 'Account created successfully! Please login.';
+            document.getElementById('signupSuccess').classList.remove('hidden');
+            
+            // Clear form
+            document.getElementById('signupMobile').value = '';
+            document.getElementById('signupPassword').value = '';
+            document.getElementById('signupConfirmPassword').value = '';
+            
+            // Switch to login form after delay
+            setTimeout(() => {
+                this.showLoginForm();
+            }, 2000);
+            
+        } catch (error) {
+            this.showError('signupError', error.message);
+        } finally {
+            this.setLoading('signup', false);
+        }
+    }
+    
+    validateMobile(mobile) {
+        const mobileRegex = /^[6-9]\d{9}$/;
+        return mobileRegex.test(mobile);
+    }
+    
+    hashPassword(password) {
+        // Simple hash function (for demo purposes only)
+        let hash = 0;
+        for (let i = 0; i < password.length; i++) {
+            const char = password.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash;
+        }
+        return Math.abs(hash).toString(16);
+    }
+    
+    verifyPassword(password, hashedPassword) {
+        return this.hashPassword(password) === hashedPassword;
+    }
+    
+    findUser(mobile) {
+        const users = JSON.parse(localStorage.getItem('expense_tracker_users') || '[]');
+        return users.find(user => user.mobile === mobile);
+    }
+    
+    saveUser(user) {
+        const users = JSON.parse(localStorage.getItem('expense_tracker_users') || '[]');
+        users.push(user);
+        localStorage.setItem('expense_tracker_users', JSON.stringify(users));
+    }
+    
+    generateToken() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let token = '';
+        for (let i = 0; i < 32; i++) {
+            token += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return token;
+    }
+    
+    showError(elementId, message) {
+        const errorElement = document.getElementById(elementId);
+        errorElement.textContent = message;
+        errorElement.classList.remove('hidden');
+        setTimeout(() => {
+            errorElement.classList.add('hidden');
+        }, 5000);
+    }
+    
+    setLoading(type, loading = true) {
+        const btnText = document.getElementById(`${type}BtnText`);
+        const spinner = document.getElementById(`${type}Spinner`);
+        const btn = document.getElementById(`${type}Btn`);
+        
+        if (loading) {
+            btnText.textContent = 'Processing...';
+            spinner.classList.remove('hidden');
+            btn.disabled = true;
+        } else {
+            btnText.textContent = type === 'login' ? 'Login' : 'Sign Up';
+            spinner.classList.add('hidden');
+            btn.disabled = false;
+        }
+    }
+    
+    logout() {
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('authToken');
+        this.currentUser = null;
+        this.showAuth();
+        this.expenses = [];
+        this.incomes = [];
+    }
+    
     async syncFromCloud() {
         if (typeof syncManager === 'undefined') return;
 

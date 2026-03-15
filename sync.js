@@ -45,6 +45,51 @@ class SyncManager {
         return method === 'GET' ? res.json() : null;
     }
 
+    // ---- User Authentication ----
+
+    async signupUser(mobile, passwordHash) {
+        const row = {
+            mobile: mobile,
+            password_hash: passwordHash,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+        try {
+            await this.req('users', 'POST', [row]);
+            return { success: true };
+        } catch (e) {
+            console.error('Signup error:', e);
+            return { success: false, error: e.message };
+        }
+    }
+
+    async loginUser(mobile) {
+        try {
+            const users = await this.req('users', 'GET', null, `?mobile=eq.${mobile}`);
+            if (users && users.length > 0) {
+                return { success: true, user: users[0] };
+            }
+            return { success: false, error: 'User not found' };
+        } catch (e) {
+            console.error('Login error:', e);
+            return { success: false, error: e.message };
+        }
+    }
+
+    async updateUserPassword(mobile, passwordHash) {
+        const patch = {
+            password_hash: passwordHash,
+            updated_at: new Date().toISOString()
+        };
+        try {
+            await this.req('users', 'PATCH', patch, `?mobile=eq.${mobile}`);
+            return { success: true };
+        } catch (e) {
+            console.error('Password update error:', e);
+            return { success: false, error: e.message };
+        }
+    }
+
     // ---- Push individual records ----
 
     async pushExpense(exp) {
