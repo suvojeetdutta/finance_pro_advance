@@ -640,6 +640,9 @@ class ExpenseTrackerApp {
                 // Close mobile menu if open
                 if (this.els.sidebar && this.els.sidebar.classList.contains('mobile-menu-open')) {
                     this.els.sidebar.classList.remove('mobile-menu-open');
+                    const icon = this.els.mobileMenuBtn.querySelector('i');
+                    icon.classList.remove('fa-xmark');
+                    icon.classList.add('fa-bars');
                 }
             });
         });
@@ -647,7 +650,27 @@ class ExpenseTrackerApp {
         // Mobile Menu Toggle
         if (this.els.mobileMenuBtn && this.els.sidebar) {
             this.els.mobileMenuBtn.addEventListener('click', () => {
-                this.els.sidebar.classList.toggle('mobile-menu-open');
+                const isOpen = this.els.sidebar.classList.toggle('mobile-menu-open');
+                const icon = this.els.mobileMenuBtn.querySelector('i');
+                if (isOpen) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-xmark');
+                } else {
+                    icon.classList.remove('fa-xmark');
+                    icon.classList.add('fa-bars');
+                }
+            });
+
+            // Close sidebar when clicking on the backdrop (the ::after pseudo element area)
+            document.addEventListener('click', (e) => {
+                if (this.els.sidebar.classList.contains('mobile-menu-open') &&
+                    !this.els.sidebar.contains(e.target) &&
+                    !this.els.mobileMenuBtn.contains(e.target)) {
+                    this.els.sidebar.classList.remove('mobile-menu-open');
+                    const icon = this.els.mobileMenuBtn.querySelector('i');
+                    icon.classList.remove('fa-xmark');
+                    icon.classList.add('fa-bars');
+                }
             });
         }
 
