@@ -669,13 +669,8 @@ body {
 
     .sidebar-header {
         margin-bottom: 1.5rem;
-        width: 100%;
     }
-    /* Hide the hamburger from within sidebar header flow on mobile (it's fixed positioned) */
-    .sidebar-header .mobile-menu-btn {
-        position: static;
-        display: none;
-    }
+
     .sidebar .logo {
         font-size: 1.2rem;
     }
