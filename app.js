@@ -597,7 +597,11 @@ class ExpenseTrackerApp {
             budgetModal: document.getElementById('budgetModal'),
             editBudgetsBtn: document.getElementById('editBudgetsBtn'),
             saveBudgetsBtn: document.getElementById('saveBudgetsBtn'),
-            budgetEditList: document.getElementById('budgetEditList')
+            budgetEditList: document.getElementById('budgetEditList'),
+            
+            // Mobile Menu
+            mobileMenuBtn: document.getElementById('mobileMenuBtn'),
+            sidebar: document.querySelector('.sidebar')
         };
 
         // Insights chart instances
@@ -632,8 +636,20 @@ class ExpenseTrackerApp {
                 this.switchView(view);
                 this.els.navLinks.forEach(l => l.classList.remove('active'));
                 e.currentTarget.classList.add('active');
+                
+                // Close mobile menu if open
+                if (this.els.sidebar && this.els.sidebar.classList.contains('mobile-menu-open')) {
+                    this.els.sidebar.classList.remove('mobile-menu-open');
+                }
             });
         });
+
+        // Mobile Menu Toggle
+        if (this.els.mobileMenuBtn && this.els.sidebar) {
+            this.els.mobileMenuBtn.addEventListener('click', () => {
+                this.els.sidebar.classList.toggle('mobile-menu-open');
+            });
+        }
 
         // Theme Toggle Removed
 
