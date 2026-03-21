@@ -372,12 +372,15 @@ body {
     background: var(--bg-secondary);
     width: 90%;
     max-width: 500px;
+    max-height: 90vh;
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.2);
     transform: translateY(20px) scale(0.95);
     transition: var(--transition);
     overflow: hidden;
     border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-overlay.show .glass-modal {
@@ -413,6 +416,8 @@ body {
 
 .modal-body {
     padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
 }
 
 /* Forms */
