@@ -43,21 +43,25 @@ class ExpenseTrackerApp {
     
     // Dark Mode Methods
     initDarkMode() {
-        const toggle = document.getElementById('darkModeToggle');
+        // Try header toggle first, then sidebar toggle
+        let toggle = document.getElementById('darkModeToggle');
+        if (!toggle) toggle = document.getElementById('darkModeToggleSidebar');
         if (!toggle) return;
         
         // Check saved preference
         const isDark = localStorage.getItem('darkMode') === 'true';
         if (isDark) {
             document.body.classList.add('dark-mode');
-            toggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+            const icon = toggle.querySelector('i');
+            if (icon) icon.className = 'fa-solid fa-sun';
         }
         
         toggle.addEventListener('click', () => {
             document.body.classList.toggle('dark-mode');
             const dark = document.body.classList.contains('dark-mode');
             localStorage.setItem('darkMode', dark);
-            toggle.innerHTML = dark ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+            const icon = toggle.querySelector('i');
+            if (icon) icon.className = dark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
             
             // Re-render all charts with new colors
             this.render();
