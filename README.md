@@ -72,9 +72,9 @@ A comprehensive personal finance management application that helps you track exp
 
 1. **Clone or download the repository**
    ```bash
-git clone https://github.com/suvojeetdutta/finance_pro_advance.git
-cd finance_pro_advance
-```
+   git clone https://github.com/suvojeetdutta/finance_pro_advance.git
+   cd finance_pro_advance
+   ```
 
 2. **Configure Supabase (Optional)**
    - Create a project at [supabase.com](https://supabase.com)
