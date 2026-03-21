@@ -211,8 +211,6 @@ __marimo__/
 01_jan_expenses.txt
 02_feb_expenses.txt
 finance_pro_backup_*.json
-supabase_setup.sql
-supabase_fix.sql
 updateStorageKeys.js
 
 # Local config (may contain sensitive credentials)
