@@ -58,6 +58,9 @@ class ExpenseTrackerApp {
             const dark = document.body.classList.contains('dark-mode');
             localStorage.setItem('darkMode', dark);
             toggle.innerHTML = dark ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+            
+            // Re-render all charts with new colors
+            this.render();
         });
     }
     
