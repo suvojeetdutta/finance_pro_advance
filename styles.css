@@ -24,7 +24,43 @@
     --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* Dark mode removed per user request */
+/* Dark Mode */
+body.dark-mode {
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #16213e;
+    --text-primary: #e4e4e7;
+    --text-secondary: #a1a1aa;
+    --border-color: rgba(255,255,255,0.1);
+    
+    --glass-bg: rgba(22, 33, 62, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .glass-card,
+body.dark-mode .glass-modal {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+}
+
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+    background: var(--bg-primary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+body.dark-mode ::-webkit-scrollbar {
+    width: 8px;
+}
+body.dark-mode ::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+body.dark-mode ::-webkit-scrollbar-thumb {
+    background: var(--text-secondary);
+    border-radius: 4px;
+}
 
 
 * {
@@ -341,6 +377,25 @@ body {
 .btn-success {
     background: linear-gradient(135deg, var(--success-color), #34d399);
     color: white;
+}
+
+.btn-icon {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
 }
 
 .full-width {

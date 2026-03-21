@@ -11,6 +11,9 @@ class ExpenseTrackerApp {
         this.lineChart = null;
         this.currentUser = null;
         
+        // Initialize dark mode
+        this.initDarkMode();
+        
         // Initialize authentication
         this.initAuth();
         
@@ -36,6 +39,26 @@ class ExpenseTrackerApp {
             // Show auth screen
             this.showAuth();
         }
+    }
+    
+    // Dark Mode Methods
+    initDarkMode() {
+        const toggle = document.getElementById('darkModeToggle');
+        if (!toggle) return;
+        
+        // Check saved preference
+        const isDark = localStorage.getItem('darkMode') === 'true';
+        if (isDark) {
+            document.body.classList.add('dark-mode');
+            toggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+        }
+        
+        toggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const dark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', dark);
+            toggle.innerHTML = dark ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+        });
     }
     
     // Authentication Methods
