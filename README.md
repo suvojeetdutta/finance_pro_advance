@@ -1,4 +1,4 @@
-# Finance Pro Advance
+# Finance Pro
 
 A comprehensive personal finance management application that helps you track expenses, income, budgets, and gain insights into your financial health. Works seamlessly on both desktop and mobile devices.
 
