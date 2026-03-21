@@ -2,6 +2,25 @@
 var SUPABASE_URL = typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : '';
 var SUPABASE_KEY = typeof SUPABASE_KEY !== 'undefined' ? SUPABASE_KEY : '';
 
+// Global dark mode toggle function (called from HTML onclick)
+window.toggleDarkMode = function() {
+    const toggle = document.getElementById('darkModeToggle') || document.getElementById('darkModeToggleSidebar');
+    if (!toggle) return;
+    
+    const body = document.body;
+    body.classList.toggle('dark-mode');
+    const dark = body.classList.contains('dark-mode');
+    localStorage.setItem('darkMode', dark);
+    
+    const icon = toggle.querySelector('i');
+    const text = toggle.querySelector('span');
+    if (icon) icon.className = dark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    if (text) text.textContent = dark ? 'Light Mode' : 'Dark Mode';
+    
+    // Re-render charts if app is initialized
+    if (window.expenseApp) window.expenseApp.render();
+};
+
 class ExpenseTrackerApp {
     constructor() {
         this.expenses = [];
@@ -48,6 +67,9 @@ class ExpenseTrackerApp {
         if (!toggle) toggle = document.getElementById('darkModeToggleSidebar');
         if (!toggle) return;
         
+        // Also check if there's a logout button nearby (they're in same container)
+        const logoutBtn = document.getElementById('logoutBtn');
+        
         // Check saved preference
         const isDark = localStorage.getItem('darkMode') === 'true';
         if (isDark) {
@@ -58,18 +80,21 @@ class ExpenseTrackerApp {
             if (text) text.textContent = 'Light Mode';
         }
         
-        toggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            const dark = document.body.classList.contains('dark-mode');
+        // Use inline onclick for more reliability
+        toggle.onclick = () => {
+            const body = document.body;
+            body.classList.toggle('dark-mode');
+            const dark = body.classList.contains('dark-mode');
             localStorage.setItem('darkMode', dark);
+            
             const icon = toggle.querySelector('i');
             const text = toggle.querySelector('span');
             if (icon) icon.className = dark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
             if (text) text.textContent = dark ? 'Light Mode' : 'Dark Mode';
             
-            // Re-render all charts with new colors
-            this.render();
-        });
+            // Re-render all charts with new colors (use window.expenseApp to ensure correct context)
+            if (window.expenseApp) window.expenseApp.render();
+        };
     }
     
     // Authentication Methods
