@@ -1945,6 +1945,9 @@ class ExpenseTrackerApp {
         const totalInc = yearInc.reduce((s, [, arr]) => s + arr.reduce((a, b) => a + b.amount, 0), 0);
         const balance = totalInc - totalExp;
         
+        // Calculate savings rate
+        const savingsRate = totalInc > 0 ? ((balance / totalInc) * 100).toFixed(1) : 0;
+        
         document.getElementById('yearSummaryCards').innerHTML = `
             <div class="glass-card stat-card">
                 <div class="stat-icon" style="background:linear-gradient(135deg,#3b82f6,#60a5fa)"><i class="fa-solid fa-arrow-up"></i></div>
@@ -1957,6 +1960,10 @@ class ExpenseTrackerApp {
             <div class="glass-card stat-card">
                 <div class="stat-icon" style="background:linear-gradient(135deg,${balance >= 0 ? '#10b981,#34d399' : '#ef4444,#f87171'})"><i class="fa-solid fa-wallet"></i></div>
                 <div class="stat-details"><p>Balance</p><h3 style="color:${balance >= 0 ? 'var(--success-color)' : '#ef4444'}">₹${balance.toLocaleString()}</h3></div>
+            </div>
+            <div class="glass-card stat-card">
+                <div class="stat-icon" style="background:linear-gradient(135deg,${savingsRate >= 0 ? '#8b5cf6,#a78bfa' : '#ef4444,#f87171'})"><i class="fa-solid fa-piggy-bank"></i></div>
+                <div class="stat-details"><p>Savings Rate</p><h3 style="color:${savingsRate >= 0 ? 'var(--success-color)' : '#ef4444'}">${savingsRate}%</h3></div>
             </div>
         `;
         
@@ -2030,6 +2037,53 @@ class ExpenseTrackerApp {
                 plugins: { legend: { display: false } },
                 scales: {
                     x: { ticks: { color: textColor }, grid: { display: false } },
+                    y: { beginAtZero: true, ticks: { color: textColor }, grid: { color: gridColor } }
+                }
+            }
+        });
+        
+        // 3b. Income vs Expenses Chart
+        const monthlyIncomeData = [];
+        for (let m = 1; m <= 12; m++) {
+            const monthStr = String(m).padStart(2, '0');
+            const monthKey = `${year}-${monthStr}`;
+            const moInc = this.incomes[monthKey];
+            monthlyIncomeData.push(moInc ? moInc.reduce((s, e) => s + e.amount, 0) : 0);
+        }
+        
+        this.destroyChart('analyticsIncomeExpense');
+        this.insCharts.analyticsIncomeExpense = new Chart(document.getElementById('analyticsIncomeExpenseChart'), {
+            type: 'bar',
+            data: {
+                labels: monthNames,
+                datasets: [
+                    {
+                        label: 'Income',
+                        data: monthlyIncomeData,
+                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Expenses',
+                        data: monthlyData,
+                        backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: true, position: 'top', labels: { color: textColor, padding: 15 } }
+                },
+                scales: {
+                    x: { 
+                        ticks: { color: textColor }, 
+                        grid: { display: false },
+                        categoryPercentage: 0.6,
+                        barPercentage: 0.7
+                    },
                     y: { beginAtZero: true, ticks: { color: textColor }, grid: { color: gridColor } }
                 }
             }
