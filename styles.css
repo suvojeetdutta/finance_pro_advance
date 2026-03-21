@@ -670,6 +670,12 @@ body {
         height: auto;
         min-height: 100vh;
     }
+    
+    /* Smaller dark mode toggle on mobile */
+    .btn-icon {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.9rem;
+    }
 
     /* Hamburger button: fixed top-left corner, always visible */
     .mobile-menu-btn {
