@@ -1053,7 +1053,7 @@ class ExpenseTrackerApp {
             data: {
                 labels: monthNames,
                 datasets: [{
-                    label: 'Day-wise Expenses',
+                    label: 'Day-wise Expenses Per Month',
                     data: dailyValues,
                     backgroundColor: dailyValues.map((_, i) => this.getMonthColor(i)),
                     borderRadius: 4
