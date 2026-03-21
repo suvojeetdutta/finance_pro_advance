@@ -1806,6 +1806,14 @@ class ExpenseTrackerApp {
         // 3. Fixed vs Daily
         let fixedSum=0, dailySum=0;
         curr.forEach(e => { if(e.type==='Fixed') fixedSum+=e.amount; else dailySum+=e.amount; });
+        
+        // Calculate days in current month and average daily spend
+        const [yr, mo] = ym.split('-');
+        const daysInMonth = new Date(parseInt(yr), parseInt(mo), 0).getDate();
+        const today = new Date().getDate();
+        const currentDay = (parseInt(yr) === new Date().getFullYear() && parseInt(mo) === new Date().getMonth() + 1) ? today : daysInMonth;
+        const avgDaily = currentDay > 0 ? Math.round(total / currentDay) : 0;
+        
         document.getElementById('fixedVsDailyCards').innerHTML = `
             <div class="glass-card stat-card">
                 <div class="stat-icon" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)"><i class="fa-solid fa-thumbtack"></i></div>
@@ -1819,10 +1827,13 @@ class ExpenseTrackerApp {
                 <div class="stat-icon" style="background:linear-gradient(135deg,#f97316,#fb923c)"><i class="fa-solid fa-coins"></i></div>
                 <div class="stat-details"><p>Total Spend</p><h3>₹${total.toLocaleString()}</h3><small>${curr.length} transactions</small></div>
             </div>
+            <div class="glass-card stat-card">
+                <div class="stat-icon" style="background:linear-gradient(135deg,#ec4899,#f472b6)"><i class="fa-solid fa-chart-line"></i></div>
+                <div class="stat-details"><p>Avg Daily Spend</p><h3>₹${avgDaily.toLocaleString()}</h3><small>${currentDay} days</small></div>
+            </div>
         `;
 
         // 4. Month-over-Month
-        const [yr, mo] = ym.split('-');
         const prevMo = parseInt(mo)===1 ? '12' : String(parseInt(mo)-1).padStart(2,'0');
         const prevYr = parseInt(mo)===1 ? String(parseInt(yr)-1) : yr;
         const prevYM = `${prevYr}-${prevMo}`;
@@ -1945,8 +1956,10 @@ class ExpenseTrackerApp {
         const totalInc = yearInc.reduce((s, [, arr]) => s + arr.reduce((a, b) => a + b.amount, 0), 0);
         const balance = totalInc - totalExp;
         
-        // Calculate savings rate
+        // Calculate savings rate and average daily spend
         const savingsRate = totalInc > 0 ? ((balance / totalInc) * 100).toFixed(1) : 0;
+        const daysPassed = new Date().getFullYear() === parseInt(year) ? new Date().getMonth() + 1 : 12;
+        const avgDailyYear = daysPassed > 0 ? Math.round(totalExp / (daysPassed * 30)) : 0;
         
         document.getElementById('yearSummaryCards').innerHTML = `
             <div class="glass-card stat-card">
@@ -1964,6 +1977,10 @@ class ExpenseTrackerApp {
             <div class="glass-card stat-card">
                 <div class="stat-icon" style="background:linear-gradient(135deg,${savingsRate >= 0 ? '#8b5cf6,#a78bfa' : '#ef4444,#f87171'})"><i class="fa-solid fa-piggy-bank"></i></div>
                 <div class="stat-details"><p>Savings Rate</p><h3 style="color:${savingsRate >= 0 ? 'var(--success-color)' : '#ef4444'}">${savingsRate}%</h3></div>
+            </div>
+            <div class="glass-card stat-card">
+                <div class="stat-icon" style="background:linear-gradient(135deg,#ec4899,#f472b6)"><i class="fa-solid fa-chart-line"></i></div>
+                <div class="stat-details"><p>Avg Daily</p><h3>₹${avgDailyYear.toLocaleString()}</h3><small>per day estimate</small></div>
             </div>
         `;
         
