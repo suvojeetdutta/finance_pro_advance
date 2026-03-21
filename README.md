@@ -72,7 +72,7 @@ A comprehensive personal finance management application that helps you track exp
 
 1. **Clone or download the repository**
    ```bash
-git clone <repository-url>
+git clone https://github.com/suvojeetdutta/finance_pro_advance.git
 cd expense_tracker_advance
 ```
 
