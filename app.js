@@ -1958,8 +1958,21 @@ class ExpenseTrackerApp {
         
         // Calculate savings rate and average daily spend
         const savingsRate = totalInc > 0 ? ((balance / totalInc) * 100).toFixed(1) : 0;
-        const daysPassed = new Date().getFullYear() === parseInt(year) ? new Date().getMonth() + 1 : 12;
-        const avgDailyYear = daysPassed > 0 ? Math.round(totalExp / (daysPassed * 30)) : 0;
+        // Calculate actual calendar days passed in the year
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const selectedYear = parseInt(year);
+        let daysPassed = 0;
+        if (selectedYear < currentYear) {
+            // Full year - calculate days from Jan 1 to Dec 31
+            daysPassed = (new Date(selectedYear, 11, 31) - new Date(selectedYear, 0, 0)) / (1000 * 60 * 60 * 24);
+        } else if (selectedYear === currentYear) {
+            // Current year - days from Jan 1 to today
+            daysPassed = (now - new Date(currentYear, 0, 0)) / (1000 * 60 * 60 * 24);
+        } else {
+            daysPassed = 0;
+        }
+        const avgDailyYear = daysPassed > 0 ? Math.round(totalExp / daysPassed) : 0;
         
         document.getElementById('yearSummaryCards').innerHTML = `
             <div class="glass-card stat-card">
