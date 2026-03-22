@@ -122,6 +122,12 @@ class ExpenseTrackerApp {
             });
         }
         
+        // Dashboard search button
+        const dashSearchBtn = document.getElementById('dashSearchBtn');
+        if (dashSearchBtn) {
+            dashSearchBtn.addEventListener('click', () => this.performFullSearch('dashboard'));
+        }
+        
         // History search events
         if (this.historySearchInput) {
             this.historySearchInput.addEventListener('input', (e) => this.handleSearch(e, 'history'));
@@ -129,6 +135,12 @@ class ExpenseTrackerApp {
             this.historySearchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') this.performFullSearch('history');
             });
+        }
+        
+        // History search button
+        const historySearchBtn = document.getElementById('historySearchBtn');
+        if (historySearchBtn) {
+            historySearchBtn.addEventListener('click', () => this.performFullSearch('history'));
         }
         
         // Close dropdown when clicking outside
@@ -234,11 +246,8 @@ class ExpenseTrackerApp {
     }
     
     viewExpenseDetail(id) {
-        const expense = this.expenses.find(e => e.id === id);
-        if (!expense) return;
-        
-        // Could open a modal or navigate to the expense
-        alert(`Expense: ${expense.sub}\nAmount: ₹${expense.amount}\nDate: ${expense.date || expense.expense_date}\nDescription: ${expense.desc || expense.description}`);
+        // Open the expense modal in edit mode (user can view details and edit if needed)
+        this.openEditExpense(id);
     }
     
     // Authentication Methods

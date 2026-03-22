@@ -651,10 +651,16 @@ body {
     position: relative;
     flex: 2;
 }
+.search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
 .search-group input {
     width: 100%;
     padding: 0.8rem;
     padding-left: 2.5rem;
+    padding-right: 3rem;
     border-radius: 10px;
     border: 1px solid var(--border-color);
     background: var(--bg-primary);
@@ -663,6 +669,24 @@ body {
 }
 .search-group label i {
     margin-right: 5px;
+}
+.search-btn {
+    position: absolute;
+    right: 5px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.search-btn:hover {
+    background: var(--primary-hover);
 }
 .search-results-dropdown {
     position: absolute;
