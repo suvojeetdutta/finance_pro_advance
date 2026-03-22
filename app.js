@@ -179,8 +179,10 @@ class ExpenseTrackerApp {
             this.initFuse();
         }
         
-        // Perform fuzzy search
-        const results = this.fuse.search(query).slice(0, 10);
+        // Perform fuzzy search and sort by date descending (latest first)
+        const results = this.fuse.search(query)
+            .sort((a, b) => new Date(b.item.date) - new Date(a.item.date))
+            .slice(0, 10);
         this.displaySearchResults(results, resultsContainer);
     }
     
@@ -195,8 +197,9 @@ class ExpenseTrackerApp {
             this.initFuse();
         }
         
-        // Get more results for full search
-        const results = this.fuse.search(query);
+        // Get more results for full search and sort by date descending (latest first)
+        const results = this.fuse.search(query)
+            .sort((a, b) => new Date(b.item.date) - new Date(a.item.date));
         
         // Navigate to search view with results
         this.showSearchResults(results.map(r => r.item), query);
