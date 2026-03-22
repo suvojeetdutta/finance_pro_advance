@@ -242,17 +242,11 @@ class ExpenseTrackerApp {
     }
     
     positionSearchDropdown(container) {
-        // Get the parent search input
-        const searchInput = container.parentElement?.querySelector('input');
-        if (!searchInput) return;
-        
-        const inputRect = searchInput.getBoundingClientRect();
-        
-        // Position dropdown below the search input
-        container.style.top = (inputRect.bottom + 5) + 'px';
-        container.style.left = inputRect.left + 'px';
-        container.style.width = inputRect.width + 'px';
-        container.style.maxWidth = (window.innerWidth - 40) + 'px';
+        // Clearing any inline styles previously set by JS, relying fully on CSS relative absolute positioning
+        container.style.top = '';
+        container.style.left = '';
+        container.style.width = '';
+        container.style.maxWidth = '';
     }
     
     filterHistoryBySearch(items) {
