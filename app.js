@@ -196,15 +196,10 @@ class ExpenseTrackerApp {
         }
         
         // Get more results for full search
-        const results = this.fuse.search(query).slice(0, 50);
+        const results = this.fuse.search(query);
         
-        // Navigate to history view with search results
-        if (view === 'dashboard') {
-            this.switchView('history');
-            this.filterHistoryBySearch(results.map(r => r.item));
-        } else {
-            this.filterHistoryBySearch(results.map(r => r.item));
-        }
+        // Navigate to search view with results
+        this.showSearchResults(results.map(r => r.item), query);
         
         // Close dropdown
         const resultsContainer = view === 'dashboard' ? this.dashSearchResults : this.historySearchResults;
@@ -243,6 +238,55 @@ class ExpenseTrackerApp {
         // Update history list with search results
         this.currentView = 'history';
         this.renderHistory(items);
+    }
+    
+    showSearchResults(items, query) {
+        // Navigate to search view
+        this.switchView('search');
+        
+        // Update search header
+        document.getElementById('searchQueryText').querySelector('span').textContent = `"${query}"`;
+        document.getElementById('searchResultCount').textContent = `${items.length} result${items.length !== 1 ? 's' : ''} found`;
+        
+        // Render search results
+        const container = document.getElementById('searchResultsContainer');
+        
+        if (items.length === 0) {
+            container.innerHTML = '<div class="empty-state">No expenses found matching your search.</div>';
+            return;
+        }
+        
+        // Sort by date (newest first)
+        items.sort((a, b) => {
+            const dateA = new Date(a.date || a.expense_date);
+            const dateB = new Date(b.date || b.expense_date);
+            return dateB - dateA;
+        });
+        
+        container.innerHTML = items.map(ex => `
+            <div class="glass-card expense-item" onclick="window.expenseApp.viewExpenseDetail('${ex.id}')">
+                <div class="expense-icon ${ex.type === 'Fixed' ? 'fixed-bg' : 'daily-bg'}">
+                    <i class="fa-solid ${ex.type === 'Fixed' ? 'fa-calendar-check' : 'fa-money-bill'}"></i>
+                </div>
+                <div class="expense-info">
+                    <div class="expense-main">
+                        <h4>${ex.sub || ex.major}</h4>
+                        <span class="expense-desc">${ex.desc || ex.description || '-'}</span>
+                    </div>
+                    <span class="expense-date">${ex.date || ex.expense_date}</span>
+                </div>
+                <div class="expense-amount expense-amt">₹${parseFloat(ex.amount).toLocaleString('en-IN')}</div>
+            </div>
+        `).join('');
+    }
+    
+    clearSearch() {
+        // Clear search inputs
+        if (this.dashSearchInput) this.dashSearchInput.value = '';
+        if (this.historySearchInput) this.historySearchInput.value = '';
+        
+        // Navigate to dashboard
+        this.switchView('dashboard');
     }
     
     viewExpenseDetail(id) {
@@ -1028,9 +1072,10 @@ class ExpenseTrackerApp {
             'budget': 'Budgets',
             'income': 'Income',
             'insights': 'Insights',
-            'analytics': 'Analytics'
+            'analytics': 'Analytics',
+            'search': 'Search Results'
         };
-        this.els.pageTitle.textContent = titles[view];
+        this.els.pageTitle.textContent = titles[view] || 'Finance Pro';
         this.render();
     }
 
@@ -1054,6 +1099,9 @@ class ExpenseTrackerApp {
                 break;
             case 'analytics':
                 this.renderAnalytics();
+                break;
+            case 'search':
+                // Search results are rendered separately via showSearchResults
                 break;
         }
     }

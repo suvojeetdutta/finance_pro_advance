@@ -466,6 +466,25 @@
                     </div>
                 </div>
 
+                <!-- Search Results View -->
+                <div id="searchView" class="view">
+                    <div class="glass-card header-card search-header">
+                        <div class="search-info">
+                            <h2><i class="fa-solid fa-search"></i> Search Results</h2>
+                            <p id="searchQueryText">Showing results for: <span>""</span></p>
+                            <p id="searchResultCount"></p>
+                        </div>
+                        <button class="btn btn-secondary" onclick="window.expenseApp.clearSearch()">
+                            <i class="fa-solid fa-xmark"></i> Clear Search
+                        </button>
+                    </div>
+                    
+                    <div class="history-list" id="searchResultsContainer">
+                        <!-- Populated dynamically -->
+                        <div class="empty-state">No results found.</div>
+                    </div>
+                </div>
+
                 <!-- Budgets View -->
                 <div id="budgetView" class="view">
                     <div class="glass-card filters-card">
