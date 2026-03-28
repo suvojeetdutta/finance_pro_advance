@@ -300,6 +300,10 @@
             </ul>
 
             <div class="sidebar-footer">
+                <button class="backup-btn" id="manageSubcatsBtn" title="Manage Subcategories">
+                    <i class="fa-solid fa-tags"></i>
+                    <span>Categories</span>
+                </button>
                 <button class="backup-btn" id="darkModeToggleSidebar" title="Toggle Dark Mode" onclick="window.toggleDarkMode && window.toggleDarkMode()">
                     <i class="fa-solid fa-moon"></i>
                     <span>Dark Mode</span>
@@ -746,6 +750,19 @@
                         <input type="text" id="incomeDescInput" placeholder="e.g. January Salary">
                     </div>
                     <button class="btn btn-success full-width" id="saveIncomeBtn">Save Income</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manage Subcategories Modal -->
+        <div class="modal-overlay" id="subcatModal">
+            <div class="glass-modal" style="max-width: 560px;">
+                <div class="modal-header">
+                    <h2><i class="fa-solid fa-tags"></i> Manage Subcategories</h2>
+                    <button class="close-modal"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="modal-body" id="subcatModalBody" style="max-height: 65vh; overflow-y: auto; padding-right: 10px;">
+                    <!-- Populated dynamically -->
                 </div>
             </div>
         </div>

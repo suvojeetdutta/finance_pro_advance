@@ -824,10 +824,42 @@ class ExpenseTrackerApp {
             "Want": ["Dining", "Habits", "Subscriptions", "Snacks", "Misc", "Shopping", "Entertainment", "Gifts"],
             "Save": ["Investment", "Emergency Fund", "Other"]
         };
+        // Deep copy arrays so we don't mutate defaults
+        Object.keys(this.subcategories).forEach(major => {
+            this.subcategories[major] = [...this.subcategories[major]];
+        });
+
+        // Apply rename mappings (default subcategories that were renamed)
+        const renameMappings = JSON.parse(localStorage.getItem("subcatRenameMappings") || "{}");
+        Object.keys(renameMappings).forEach(major => {
+            if (this.subcategories[major]) {
+                Object.entries(renameMappings[major]).forEach(([oldName, newName]) => {
+                    const idx = this.subcategories[major].indexOf(oldName);
+                    if (idx !== -1) this.subcategories[major][idx] = newName;
+                });
+            }
+        });
+
+        // Remove deleted subcategories
+        const deletedSubs = JSON.parse(localStorage.getItem("deletedSubcategories") || "{}");
+        Object.keys(deletedSubs).forEach(major => {
+            if (this.subcategories[major]) {
+                this.subcategories[major] = this.subcategories[major].filter(s => !deletedSubs[major].includes(s));
+            }
+        });
+
+        // Merge custom subcategories
         const customSubs = JSON.parse(localStorage.getItem("customSubcategories") || "{}");
         Object.keys(customSubs).forEach(major => {
             if (this.subcategories[major]) {
                 this.subcategories[major] = [...new Set([...this.subcategories[major], ...customSubs[major]])];
+            }
+        });
+
+        // Filter out any deleted ones from custom merge
+        Object.keys(deletedSubs).forEach(major => {
+            if (this.subcategories[major]) {
+                this.subcategories[major] = this.subcategories[major].filter(s => !deletedSubs[major].includes(s));
             }
         });
         
@@ -874,6 +906,11 @@ class ExpenseTrackerApp {
             editBudgetsBtn: document.getElementById('editBudgetsBtn'),
             saveBudgetsBtn: document.getElementById('saveBudgetsBtn'),
             budgetEditList: document.getElementById('budgetEditList'),
+            
+            // Subcategory Management
+            subcatModal: document.getElementById('subcatModal'),
+            subcatModalBody: document.getElementById('subcatModalBody'),
+            manageSubcatsBtn: document.getElementById('manageSubcatsBtn'),
             
             // Mobile Menu
             mobileMenuBtn: document.getElementById('mobileMenuBtn'),
@@ -1010,6 +1047,13 @@ class ExpenseTrackerApp {
             });
         });
 
+        // Close subcatModal close button
+        if (this.els.subcatModal) {
+            this.els.subcatModal.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', () => this.els.subcatModal.classList.remove('show'));
+            });
+        }
+
         // Forms actions
         this.els.expenseMajor.addEventListener('change', () => this.populateSubcategories());
         this.els.expenseSub.addEventListener('change', (e) => {
@@ -1061,6 +1105,11 @@ class ExpenseTrackerApp {
         }
         if (this.els.saveBudgetsBtn) {
             this.els.saveBudgetsBtn.addEventListener('click', () => this.saveBudgets());
+        }
+
+        // Subcategory Management
+        if (this.els.manageSubcatsBtn) {
+            this.els.manageSubcatsBtn.addEventListener('click', () => this.openSubcatModal());
         }
 
         // Backup & Restore
@@ -1536,6 +1585,236 @@ class ExpenseTrackerApp {
         document.getElementById('expenseId').value = '';
         document.getElementById('expenseAmount').value = '';
         document.getElementById('expenseDesc').value = '';
+    }
+
+    /* ---------------- Subcategory Management ---------------- */
+    openSubcatModal() {
+        const body = this.els.subcatModalBody;
+        if (!body) return;
+
+        const majorIcons = {
+            'Need': 'fa-cart-shopping',
+            'Want': 'fa-gift',
+            'Save': 'fa-piggy-bank'
+        };
+
+        let html = '';
+        Object.keys(this.subcategories).forEach(major => {
+            const headerClass = major.toLowerCase() + '-header';
+            const icon = majorIcons[major] || 'fa-folder';
+            html += `
+            <div class="subcat-section" data-major="${major}">
+                <div class="subcat-section-header ${headerClass}">
+                    <i class="fa-solid ${icon}"></i>
+                    ${major}
+                    <span style="margin-left:auto;font-weight:400;font-size:0.85rem;opacity:0.85;">${this.subcategories[major].length} items</span>
+                </div>
+                <div class="subcat-list">`;
+
+            this.subcategories[major].forEach((sub, idx) => {
+                // Count how many expenses use this subcategory
+                const usageCount = this.expenses.filter(e => e.major === major && e.sub === sub).length;
+                html += `
+                <div class="subcat-item" data-major="${major}" data-index="${idx}" data-name="${sub}">
+                    <span class="subcat-item-name">${sub}</span>
+                    ${usageCount > 0 ? `<span class="subcat-rename-badge">${usageCount} expense${usageCount > 1 ? 's' : ''}</span>` : ''}
+                    <div class="subcat-item-actions">
+                        <button class="subcat-action-btn" title="Rename" onclick="window.expenseApp.startRenameSubcat('${major}', ${idx})">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="subcat-action-btn subcat-delete-btn" title="Delete" onclick="window.expenseApp.deleteSubcategoryFromModal('${major}', ${idx})">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>`;
+            });
+
+            html += `
+                </div>
+                <div class="subcat-add-row">
+                    <input type="text" class="subcat-add-input" id="subcatAddInput_${major}" placeholder="New subcategory..." />
+                    <button class="subcat-add-btn" onclick="window.expenseApp.addSubcategoryFromModal('${major}')">
+                        <i class="fa-solid fa-plus"></i> Add
+                    </button>
+                </div>
+            </div>`;
+        });
+
+        body.innerHTML = html;
+        this.els.subcatModal.classList.add('show');
+    }
+
+    startRenameSubcat(major, index) {
+        const oldName = this.subcategories[major][index];
+        const item = this.els.subcatModalBody.querySelector(`.subcat-item[data-major="${major}"][data-index="${index}"]`);
+        if (!item) return;
+
+        // Replace the item content with an inline edit input
+        item.innerHTML = `
+            <input type="text" class="subcat-item-input" id="subcatRenameInput_${major}_${index}" value="${oldName}" />
+            <div class="subcat-item-actions">
+                <button class="subcat-action-btn subcat-save-btn" title="Save" onclick="window.expenseApp.confirmRenameSubcat('${major}', ${index}, '${oldName.replace(/'/g, "\\'")}')"><i class="fa-solid fa-check"></i></button>
+                <button class="subcat-action-btn subcat-cancel-btn" title="Cancel" onclick="window.expenseApp.openSubcatModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        `;
+
+        const input = document.getElementById(`subcatRenameInput_${major}_${index}`);
+        if (input) {
+            input.focus();
+            input.select();
+            // Allow pressing Enter to confirm
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    this.confirmRenameSubcat(major, index, oldName);
+                } else if (e.key === 'Escape') {
+                    this.openSubcatModal();
+                }
+            });
+        }
+    }
+
+    confirmRenameSubcat(major, index, oldName) {
+        const input = document.getElementById(`subcatRenameInput_${major}_${index}`);
+        if (!input) return;
+        const newName = input.value.trim();
+
+        if (!newName) return alert('Subcategory name cannot be empty.');
+        if (newName === oldName) { this.openSubcatModal(); return; }
+
+        // Check if newName already exists in this major category
+        if (this.subcategories[major].includes(newName)) {
+            return alert(`"${newName}" already exists under ${major}.`);
+        }
+
+        // Update the subcategories list
+        this.subcategories[major][index] = newName;
+
+        // Update customSubcategories in localStorage
+        const customSubs = JSON.parse(localStorage.getItem('customSubcategories') || '{}');
+        if (customSubs[major]) {
+            const customIdx = customSubs[major].indexOf(oldName);
+            if (customIdx !== -1) customSubs[major][customIdx] = newName;
+        }
+        // If the old name was a default one being renamed, add the new name to custom list
+        if (!customSubs[major] || !customSubs[major].includes(newName)) {
+            if (!customSubs[major]) customSubs[major] = [];
+            if (!customSubs[major].includes(newName)) customSubs[major].push(newName);
+        }
+        localStorage.setItem('customSubcategories', JSON.stringify(customSubs));
+
+        // Also store rename mappings so defaults don't come back after reload
+        const renameMappings = JSON.parse(localStorage.getItem('subcatRenameMappings') || '{}');
+        if (!renameMappings[major]) renameMappings[major] = {};
+        renameMappings[major][oldName] = newName;
+        localStorage.setItem('subcatRenameMappings', JSON.stringify(renameMappings));
+
+        // Update ALL existing expenses that use the old subcategory name
+        let updatedCount = 0;
+        this.expenses.forEach(e => {
+            if (e.major === major && e.sub === oldName) {
+                e.sub = newName;
+                updatedCount++;
+                // Sync each changed expense to cloud
+                if (typeof syncManager !== 'undefined') syncManager.pushExpense(e);
+            }
+        });
+        localStorage.setItem('expenses', JSON.stringify(this.expenses));
+
+        // Update search index
+        if (this.initFuse) this.initFuse();
+
+        // Refresh the modal
+        this.openSubcatModal();
+
+        // Show toast notification
+        this.showSubcatToast(`Renamed "${oldName}" → "${newName}"${updatedCount > 0 ? ` (${updatedCount} expense${updatedCount > 1 ? 's' : ''} updated)` : ''}`);
+
+        // Re-render current view
+        this.render();
+    }
+
+    deleteSubcategoryFromModal(major, index) {
+        const subName = this.subcategories[major][index];
+        const usageCount = this.expenses.filter(e => e.major === major && e.sub === subName).length;
+
+        let msg = `Delete subcategory "${subName}" from "${major}"?`;
+        if (usageCount > 0) {
+            msg += `\n\n⚠️ Warning: ${usageCount} expense${usageCount > 1 ? 's' : ''} use this subcategory. They will keep their current subcategory label but it won't appear in the dropdown anymore.`;
+        }
+        if (!confirm(msg)) return;
+
+        // Remove from subcategories list
+        this.subcategories[major].splice(index, 1);
+
+        // Remove from custom subcategories
+        const customSubs = JSON.parse(localStorage.getItem('customSubcategories') || '{}');
+        if (customSubs[major]) {
+            customSubs[major] = customSubs[major].filter(s => s !== subName);
+            localStorage.setItem('customSubcategories', JSON.stringify(customSubs));
+        }
+
+        // Store deletion so defaults don't come back
+        const deletedSubs = JSON.parse(localStorage.getItem('deletedSubcategories') || '{}');
+        if (!deletedSubs[major]) deletedSubs[major] = [];
+        if (!deletedSubs[major].includes(subName)) deletedSubs[major].push(subName);
+        localStorage.setItem('deletedSubcategories', JSON.stringify(deletedSubs));
+
+        // Refresh the modal
+        this.openSubcatModal();
+
+        // Repopulate the expense form dropdown
+        this.populateSubcategories();
+
+        this.showSubcatToast(`Deleted "${subName}" from ${major}`);
+    }
+
+    addSubcategoryFromModal(major) {
+        const input = document.getElementById(`subcatAddInput_${major}`);
+        if (!input) return;
+        const newName = input.value.trim();
+        if (!newName) return alert('Enter a subcategory name.');
+
+        if (this.subcategories[major].includes(newName)) {
+            return alert(`"${newName}" already exists under ${major}.`);
+        }
+
+        // Add to subcategories list
+        this.subcategories[major].push(newName);
+
+        // Persist to custom subcategories
+        const customSubs = JSON.parse(localStorage.getItem('customSubcategories') || '{}');
+        if (!customSubs[major]) customSubs[major] = [];
+        customSubs[major].push(newName);
+        localStorage.setItem('customSubcategories', JSON.stringify(customSubs));
+
+        // Refresh the modal
+        this.openSubcatModal();
+
+        // Repopulate the expense form dropdown
+        this.populateSubcategories();
+
+        this.showSubcatToast(`Added "${newName}" to ${major}`);
+    }
+
+    showSubcatToast(message) {
+        // Remove any existing toast
+        const old = document.querySelector('.subcat-toast');
+        if (old) old.remove();
+
+        const toast = document.createElement('div');
+        toast.className = 'subcat-toast';
+        toast.innerHTML = `<i class="fa-solid fa-check-circle" style="margin-right:6px;"></i>${message}`;
+        document.body.appendChild(toast);
+
+        // Trigger animation
+        requestAnimationFrame(() => {
+            toast.classList.add('show');
+        });
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, 3000);
     }
 
     /* ---------------- Income Logic ---------------- */
