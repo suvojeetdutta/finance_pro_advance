@@ -2495,12 +2495,21 @@ class ExpenseTrackerApp {
     }
 
     renderAnalyticsTrend() {
-        const cat = this.els.analyticsTrendCat?.value;
-        if(!cat) return;
+        const selectEl = document.getElementById('analyticsTrendCat');
+        const chartEl = document.getElementById('analyticsTrendChart');
+        if (!selectEl || !chartEl) return;
+        
+        let cat = selectEl.value;
+        if (!cat && selectEl.options && selectEl.options.length > 0) {
+            cat = selectEl.options[0].value;
+            selectEl.value = cat;
+        }
+        
+        if(!cat) return; // Completely empty for this year
+
         const textColor = document.body.classList.contains('dark-mode') ? '#e4e4e7' : '#2c3e50';
         const gridColor = document.body.classList.contains('dark-mode') ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
 
-        // Use selected year if available to scope the trend
         const year = document.getElementById('analyticsYearSelect')?.value;
         const relevantExpenses = year ? this.expenses.filter(e => e.date.startsWith(year)) : this.expenses;
 
@@ -2510,7 +2519,7 @@ class ExpenseTrackerApp {
         const data = allMonths.map(m => relevantExpenses.filter(e=>e.date.startsWith(m) && e.sub===cat).reduce((s,e)=>s+e.amount,0));
 
         this.destroyChart('trend');
-        this.insCharts.trend = new Chart(document.getElementById('analyticsTrendChart'), {
+        this.insCharts.trend = new Chart(chartEl, {
             type: 'line',
             data: {
                 labels,
@@ -2549,8 +2558,9 @@ class ExpenseTrackerApp {
         this._analyticsYearChange = () => this.renderAnalytics();
         yearSelect.addEventListener('change', this._analyticsYearChange);
 
-        if (this.els.analyticsTrendCat && !this._analyticsTrendBound) {
-            this.els.analyticsTrendCat.addEventListener('change', () => this.renderAnalyticsTrend());
+        const trendCatEl = document.getElementById('analyticsTrendCat');
+        if (trendCatEl && !this._analyticsTrendBound) {
+            trendCatEl.addEventListener('change', () => this.renderAnalyticsTrend());
             this._analyticsTrendBound = true;
         }
     }
@@ -2773,10 +2783,11 @@ class ExpenseTrackerApp {
         });
 
         // 5. Trend chart - populate selector & render
-        if (this.els.analyticsTrendCat) {
+        const trendCatEl = document.getElementById('analyticsTrendCat');
+        if (trendCatEl) {
             const uniqueSubs = [...new Set(yearExp.map(e=>e.sub))].sort();
-            const currentVal = this.els.analyticsTrendCat.value;
-            this.els.analyticsTrendCat.innerHTML = uniqueSubs.map(s => `<option value="${s}" ${s===currentVal?'selected':''}>${s}</option>`).join('');
+            const currentVal = trendCatEl.value;
+            trendCatEl.innerHTML = uniqueSubs.map(s => `<option value="${s}" ${s===currentVal?'selected':''}>${s}</option>`).join('');
             this.renderAnalyticsTrend();
         }
     }
